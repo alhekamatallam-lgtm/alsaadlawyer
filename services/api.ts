@@ -2,7 +2,12 @@
 import type { CaseSession } from './types';
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbwLvFO4AGizxFWOWJVnZXr4qRebJdqTqKW5a1GBLeMcv13G3R_O-i47uLX9rsF-FpjnXw/exec';
-const PLAINTIFF_FILTER = "شركة محمد راشد بالحارث وشركاه للتجارة والمقاولات";
+
+// المدعون المعتمدون في المنصة
+const ALLOWED_PLAINTIFFS = [
+    "شركة محمد راشد بالحارث وشركاه للتجارة والمقاولات",
+    "عبدالله سعود مطلق ال سعد القحطاني"
+];
 
 // Helper function to clean object keys from leading/trailing spaces
 const cleanObjectKeys = <T extends object,>(obj: T): T => {
@@ -28,8 +33,11 @@ export const fetchSessions = async (): Promise<CaseSession[]> => {
     
     const allSessions = result.data.map((item: CaseSession) => cleanObjectKeys(item));
     
-    // Apply the permanent filter for the specific plaintiff
-    return allSessions.filter(session => (session['المدعي'] || '').trim() === PLAINTIFF_FILTER);
+    // تصفية الجلسات بناءً على قائمة المدعين المعتمدة
+    return allSessions.filter(session => {
+        const plaintiff = (session['المدعي'] || '').trim();
+        return ALLOWED_PLAINTIFFS.includes(plaintiff);
+    });
 };
 
 export const updateSessionAssignment = async (id: number, assignment: string): Promise<any> => {
@@ -46,12 +54,8 @@ export const updateSessionAssignment = async (id: number, assignment: string): P
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-        mode: 'no-cors', // Required for this specific Google Script setup
+        mode: 'no-cors',
     });
 
-    // Since it's no-cors, we can't read the response. 
-    // We will optimistically assume it succeeded.
-    // A more robust solution would involve a proper API that supports CORS.
-    // For this use case, we simulate a successful response.
     return { success: true, id: String(id), updated: { "التكليف": assignment } };
 };

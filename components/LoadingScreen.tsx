@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LoadingIcon } from './icons';
 import Logo from './Logo';
@@ -22,25 +23,26 @@ const LoadingScreen: React.FC = () => {
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 px-6 max-w-lg mx-auto">
           <h1 className="text-2xl md:text-3xl font-extrabold text-dark tracking-tight">
-            مكتب المحامي عبد الله سعود آل سعد
+            مكتب المحامي عبدالله آل سعد
           </h1>
-          <p className="text-primary font-medium opacity-80 text-sm md:text-base">
-            للمحاماة والاستشارات القانونية
+          <div className="h-1 w-12 bg-primary/30 mx-auto rounded-full my-4"></div>
+          <p className="text-primary font-bold opacity-90 text-sm md:text-base leading-relaxed max-w-[280px] md:max-w-none mx-auto">
+            منصة متابعة القضايا الإدارية لشركة محمد راشد بالحارث وشركاه للتجارة والمقاولات
           </p>
         </div>
 
         <div className="flex flex-col items-center justify-center pt-8">
           <div className="flex items-center gap-3 bg-white/50 backdrop-blur-md px-6 py-2.5 rounded-full border border-border shadow-sm">
             <LoadingIcon className="w-6 h-6 text-primary" />
-            <span className="text-text font-bold text-sm">جاري تهيئة النظام...</span>
+            <span className="text-text font-bold text-xs uppercase tracking-wider">جاري تهيئة البيانات...</span>
           </div>
         </div>
       </div>
       
-      <div className="absolute bottom-10 text-[10px] text-text opacity-40 font-bold uppercase tracking-widest">
-        المملكة العربية السعودية • ٢٠٢٤
+      <div className="absolute bottom-10 text-[10px] text-text opacity-40 font-black uppercase tracking-widest">
+        نظام إدارة الجلسات الذكي • ٢٠٢٤
       </div>
     </div>
   );

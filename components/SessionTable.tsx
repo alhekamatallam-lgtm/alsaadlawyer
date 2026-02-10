@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import type { CaseSession } from '../types';
 import { EditIcon } from './icons';
@@ -14,6 +15,18 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, onUpdateClick, sh
 
     const handleRowToggle = (id: number) => {
         setExpandedRowId(prevId => (prevId === id ? null : id));
+    };
+
+    // دالة لتحديد لون المدعي
+    const getPlaintiffBadgeStyle = (name: string) => {
+        const trimmedName = (name || '').trim();
+        if (trimmedName === "شركة محمد راشد بالحارث وشركاه للتجارة والمقاولات") {
+            return "bg-blue-50 text-blue-700 border-blue-200 ring-1 ring-blue-500/10";
+        }
+        if (trimmedName === "عبدالله سعود مطلق ال سعد القحطاني") {
+            return "bg-amber-50 text-amber-800 border-amber-300 ring-1 ring-amber-600/20";
+        }
+        return "bg-gray-50 text-gray-600 border-gray-200";
     };
 
     if (sessions.length === 0) {
@@ -53,14 +66,14 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, onUpdateClick, sh
 
 
     return (
-        <div className="overflow-x-auto rounded-lg border border-border">
+        <div className="overflow-x-auto rounded-lg border border-border shadow-sm">
             <table className="min-w-full divide-y divide-border">
                 <thead className="bg-light/50">
                     <tr>
                         {showDateColumn && <th scope="col" className="px-4 py-3 text-right text-xs font-bold text-dark uppercase tracking-wider">التاريخ واليوم</th>}
                         <th scope="col" className="px-4 py-3 text-right text-xs font-bold text-dark uppercase tracking-wider">التوقيت</th>
                         <th scope="col" className="px-4 py-3 text-right text-xs font-bold text-dark uppercase tracking-wider">رقم الدعوى</th>
-                        <th scope="col" className="px-4 py-3 text-right text-xs font-bold text-dark uppercase tracking-wider hidden sm:table-cell">المدعي</th>
+                        <th scope="col" className="px-4 py-3 text-right text-xs font-bold text-dark uppercase tracking-wider">المدعي</th>
                         <th scope="col" className="px-4 py-3 text-right text-xs font-bold text-dark uppercase tracking-wider hidden md:table-cell">المحكمة</th>
                         <th scope="col" className="px-4 py-3 text-right text-xs font-bold text-dark uppercase tracking-wider">الدائرة</th>
                         <th scope="col" className="px-4 py-3 text-right text-xs font-bold text-dark uppercase tracking-wider hidden md:table-cell">التكليف</th>
@@ -74,6 +87,7 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, onUpdateClick, sh
                         const isConflict = conflictingSessionIds?.has(session.id);
                         const isExpanded = expandedRowId === session.id;
                         const circuitName = (session['الدائرة'] || '').trim();
+                        const plaintiffName = (session['المدعي'] || '').trim();
 
                         return (
                             <React.Fragment key={session.id}>
@@ -97,7 +111,13 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, onUpdateClick, sh
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-text">{session['رقم الدعوى']}</td>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-text hidden sm:table-cell max-w-[120px] truncate" title={session['المدعي']}>{session['المدعي']}</td>
+                                    
+                                    <td className="px-4 py-3 whitespace-nowrap">
+                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${getPlaintiffBadgeStyle(plaintiffName)} max-w-[150px] inline-block truncate`} title={plaintiffName}>
+                                            {plaintiffName}
+                                        </span>
+                                    </td>
+
                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-text hidden md:table-cell max-w-[150px] truncate" title={session['المحكمة']}>{session['المحكمة']}</td>
                                     
                                     <td className="px-4 py-3 whitespace-nowrap text-sm">
@@ -128,12 +148,12 @@ const SessionTable: React.FC<SessionTableProps> = ({ sessions, onUpdateClick, sh
                                 </tr>
                                 {isExpanded && (
                                     <tr className={`md:hidden ${isConflict ? 'bg-amber-50' : 'bg-white'}`}>
-                                        <td colSpan={showDateColumn ? 5 : 4} className="p-0">
+                                        <td colSpan={showDateColumn ? 6 : 5} className="p-0">
                                             <div className="px-4 py-4 bg-light/80 border-r-4 border-primary m-2 rounded-lg shadow-inner">
                                                 <div className="grid grid-cols-2 gap-4 text-xs">
                                                     <div>
                                                         <p className="font-bold text-text mb-1 text-[10px] opacity-60">المدعي</p>
-                                                        <p className="text-dark">{session['المدعي'] || 'غير مسجل'}</p>
+                                                        <p className="text-dark font-bold">{session['المدعي'] || 'غير مسجل'}</p>
                                                     </div>
                                                     <div>
                                                         <p className="font-bold text-text mb-1 text-[10px] opacity-60">المدعي عليه</p>

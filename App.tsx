@@ -12,7 +12,6 @@ import AssignmentsView from './components/AssignmentsView';
 import LawyerReport from './components/LawyerReport';
 import PlaintiffReport from './components/PlaintiffReport';
 import Logo from './components/Logo';
-import { CalendarPageSkeleton, DashboardSkeleton, AssignmentsViewSkeleton } from './components/Skeletons';
 import BottomNavBar from './components/BottomNavBar';
 import LoadingScreen from './components/LoadingScreen';
 
@@ -84,7 +83,7 @@ const App: React.FC = () => {
             setError('فشل في تحميل البيانات. يرجى المحاولة مرة أخرى.');
             console.error(err);
         } finally {
-            setTimeout(() => setIsLoading(false), 1200);
+            setTimeout(() => setIsLoading(false), 2000);
         }
     }, []);
 
@@ -251,8 +250,10 @@ const App: React.FC = () => {
                     <div className="flex items-center gap-3">
                         <Logo className="h-12 w-12 md:h-14 md:w-14" />
                         <div className="leading-tight">
-                            <h1 className="text-lg md:text-2xl font-bold text-dark">المحامي عبدالله آل سعد</h1>
-                            <p className="text-[10px] md:text-sm text-primary font-semibold opacity-85 sm:block hidden">قضايا: شركة محمد راشد بالحارث وشركاه للتجارة والمقاولات</p>
+                            <h1 className="text-lg md:text-2xl font-bold text-dark">مكتب المحامي عبدالله آل سعد</h1>
+                            <p className="text-[9px] md:text-[11px] text-primary font-bold mt-1 max-w-[200px] md:max-w-none leading-tight">
+                                منصة متابعة القضايا الإدارية لشركة محمد راشد بالحارث وشركاه للتجارة والمقاولات
+                            </p>
                         </div>
                     </div>
                      <nav className="hidden md:flex items-center space-x-2 space-x-reverse">
@@ -282,14 +283,14 @@ const App: React.FC = () => {
                              className={`flex items-center px-4 py-2 rounded-lg font-semibold transition-all ${view === 'lawyer_report' ? 'bg-primary text-white shadow-md' : 'bg-light text-text hover:bg-border'}`}
                         >
                             <BriefcaseIcon className="w-5 h-5 ml-2" />
-                            <span>تقرير المندوبين</span>
+                            <span>المندوبين</span>
                         </button>
                         <button
                              onClick={() => { setView('plaintiff_report'); handleClearFilters(); }}
                              className={`flex items-center px-4 py-2 rounded-lg font-semibold transition-all ${view === 'plaintiff_report' ? 'bg-primary text-white shadow-md' : 'bg-light text-text hover:bg-border'}`}
                         >
                             <UserGroupIcon className="w-5 h-5 ml-2" />
-                            <span>تقرير المدعين</span>
+                            <span>المدعين</span>
                         </button>
                     </nav>
                 </div>
