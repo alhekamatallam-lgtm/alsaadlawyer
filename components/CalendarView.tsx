@@ -30,11 +30,27 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     onShowOnlyUpcomingDaysToggle
 }) => {
     const sortedData = [...calendarData].sort((a, b) => {
-        const [dayA, monthA, yearA] = a.date.split('-').map(Number);
-        const [dayB, monthB, yearB] = b.date.split('-').map(Number);
-        if (yearA !== yearB) return yearA - yearB;
-        if (monthA !== monthB) return monthA - monthB;
-        return dayA - dayB;
+        const parseDate = (dateStr: string) => {
+            if (!dateStr || typeof dateStr !== 'string') return { year: 0, month: 0, day: 0 };
+            
+            // App.tsx normalizes dates to DD-MM-YYYY format after cleaning.
+            const parts = dateStr.split('-').map(Number);
+            
+            if (parts.length !== 3 || parts.some(isNaN)) {
+                return { year: 0, month: 0, day: 0 };
+            }
+            
+            const [day, month, year] = parts;
+            return { year, month, day };
+        };
+
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+
+        // Sort ascending: oldest date first
+        if (dateA.year !== dateB.year) return dateA.year - dateB.year;
+        if (dateA.month !== dateB.month) return dateA.month - dateB.month;
+        return dateA.day - dateB.day;
     });
 
     const upcomingFilteredData = useMemo(() => {
@@ -42,37 +58,50 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             return sortedData;
         }
 
-        // Get today's date in Hijri calendar with Latin numerals
-        const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-nu-latn', {
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric'
-        });
-        const parts = formatter.formatToParts(new Date());
+        try {
+            const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-nu-latn', {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric'
+            });
+            const parts = formatter.formatToParts(new Date());
 
-        const todayHijri = {
-            year: parseInt(parts.find(p => p.type === 'year')?.value || '0', 10),
-            month: parseInt(parts.find(p => p.type === 'month')?.value || '0', 10),
-            day: parseInt(parts.find(p => p.type === 'day')?.value || '0', 10),
-        };
-        
-        const parseHijriDate = (dateStr: string) => {
-            const [day, month, year] = dateStr.split('-').map(Number);
-            return { day, month, year };
-        };
+            const todayHijri = {
+                year: parseInt(parts.find(p => p.type === 'year')?.value || '0', 10),
+                month: parseInt(parts.find(p => p.type === 'month')?.value || '0', 10),
+                day: parseInt(parts.find(p => p.type === 'day')?.value || '0', 10),
+            };
+            
+            if (todayHijri.year === 0) {
+                console.warn("Could not determine today's Hijri date.");
+                return sortedData; // Fallback to all data
+            }
 
-        return sortedData.filter(day => {
-            const sessionDate = parseHijriDate(day.date);
+            const todayNum = todayHijri.year * 10000 + todayHijri.month * 100 + todayHijri.day;
 
-            // Compare dates component by component
-            if (sessionDate.year > todayHijri.year) return true;
-            if (sessionDate.year < todayHijri.year) return false;
-            // Same year, compare month
-            if (sessionDate.month > todayHijri.month) return true;
-            if (sessionDate.month < todayHijri.month) return false;
-            // Same month, compare day
-            return sessionDate.day >= todayHijri.day;
-        });
+            const parseHijriDateToNum = (dateStr: string): number | null => {
+                if (!dateStr || typeof dateStr !== 'string') return null;
+                const dateParts = dateStr.split('-').map(Number);
+                if (dateParts.length !== 3 || dateParts.some(isNaN)) {
+                    return null;
+                }
+                const [day, month, year] = dateParts;
+                // Basic sanity check
+                if (year < 1400 || month < 1 || month > 12 || day < 1 || day > 31) {
+                    return null;
+                }
+                return year * 10000 + month * 100 + day;
+            };
+
+            return sortedData.filter(day => {
+                const sessionDateNum = parseHijriDateToNum(day.date);
+                if (sessionDateNum === null) return false; // Exclude invalid dates
+                return sessionDateNum >= todayNum;
+            });
+        } catch (error) {
+            console.error("Error filtering upcoming dates:", error);
+            return sortedData; // Fallback to all data on error
+        }
     }, [sortedData, showOnlyUpcomingDays]);
 
     const dataToDisplay = selectedDate && !isShowingAllConflicts

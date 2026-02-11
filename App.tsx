@@ -43,16 +43,29 @@ const App: React.FC = () => {
                 .map(session => {
                     const newSession = { ...session };
                     
-                    const dateStr = newSession['التاريخ'];
-                    if (dateStr && typeof dateStr === 'string' && dateStr.includes('T')) {
+                    // Date formatting and cleaning
+                    let dateStr = String(newSession['التاريخ'] || '');
+                    if (dateStr) {
+                        // A more robust cleaning: remove T part and any character that is not a digit or a hyphen.
+                        const cleanedDateStr = dateStr.split('T')[0].replace(/[^\d-]/g, '');
+                        
                         try {
-                            const datePart = dateStr.split('T')[0];
-                            const [year, month, day] = datePart.split('-');
-                            if (year && month && day) {
-                                newSession['التاريخ'] = `${day}-${month}-${year}`;
+                            const parts = cleanedDateStr.split('-');
+                            if (parts.length === 3) {
+                                // Data from sheet is YYYY-MM-DD, convert to DD-MM-YYYY for display
+                                if (parts[0].length === 4) {
+                                    const [year, month, day] = parts;
+                                    newSession['التاريخ'] = `${parseInt(day, 10)}-${parseInt(month, 10)}-${year}`;
+                                } else {
+                                    // Assume it's already in a displayable format, just assign the cleaned version
+                                    newSession['التاريخ'] = cleanedDateStr;
+                                }
+                            } else {
+                                newSession['التاريخ'] = cleanedDateStr; // Assign cleaned version even if format is unexpected
                             }
                         } catch (e) {
-                            console.warn('Could not format date:', dateStr);
+                            console.warn('Could not format date:', newSession['التاريخ']);
+                            newSession['التاريخ'] = dateStr; // Fallback to original string if parsing fails
                         }
                     }
 
